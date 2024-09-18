@@ -40,7 +40,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build docker image
-        run: docker build -t juliet603/Monieflex .
+        run: docker build -t juliet603/monieflex .
 
       - name: push docker image
-        run: docker push juliet603/Monieflex
+        run: docker push juliet603/monieflex
