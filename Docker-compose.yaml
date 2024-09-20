@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  app:
+    image: postgres:alpine
+    environment:
+      - HOSTNAME=${DB_HOST}
+      - PORT=${DB_PORT}
+      - NAME=${DB_NAME}
+      - USERNAME=${DB_USER}
+      - PASSWORD=${DB_PASSWORD}
