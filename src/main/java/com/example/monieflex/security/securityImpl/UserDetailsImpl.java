@@ -17,21 +17,34 @@ import java.util.stream.Stream;
 @Setter
 @AllArgsConstructor
 public class UserDetailsImpl implements UserDetails {
-    private final User user;
+    private final Long id;
+    private final String email;
+    private final String fullName;
+    private final String password;
+    private final List<GrantedAuthority> authorities;
+
+    public UserDetailsImpl(User user) {
+        this.id = user.getId();
+        this.email = user.getEmail();
+        this.fullName = user.getFirstName() + " " + user.getLastName();
+        this.password = user.getPassword();
+        this.authorities = Stream.of(new SimpleGrantedAuthority(user.getRoles().name()))
+                .collect(Collectors.toList());
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return authorities;
     }
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return user.getEmail();
+        return email;
     }
 
     @Override
