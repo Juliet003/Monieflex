@@ -26,8 +26,8 @@ public class DtoMapper {
                 .phoneNumber(userSignupRequest.getPhoneNumber())
                 .roles(Roles.USER)
                 .walletBalance(BigDecimal.ZERO)
-                .password(userSignupRequest.getPassword())
-                .confirmPassword(userSignupRequest.getConfirmPassword())
+                .password(passwordEncoder.encode(userSignupRequest.getPassword()))
+                .confirmPassword(passwordEncoder.encode(userSignupRequest.getConfirmPassword()))
                 .build();
     }
 
