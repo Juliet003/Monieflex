@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 @Setter
 @Getter
@@ -14,6 +15,6 @@ public class SignupResponse {
     private String firstName;
     private String lastName;
     private String phoneNumber;
-    private String bvn;
-    private BigDecimal wallet;
+    private Map<String, Object> virtualAccountDetails;
+
 }
