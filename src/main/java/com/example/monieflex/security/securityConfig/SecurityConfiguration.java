@@ -46,6 +46,7 @@ public class SecurityConfiguration {
                         .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/auth/user/sign-up")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/auth/user/login")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/auth/user/verify-otp")).permitAll()
                         .anyRequest()
                         .authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

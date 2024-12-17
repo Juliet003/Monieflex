@@ -32,4 +32,10 @@ public class User {
     private LocalDateTime lastLogin;
 
     private BigDecimal walletBalance;
+
+    private String otp;
+    private LocalDateTime otpExpiryTime;
+
+    @Column(name = "is_verified",nullable = false)
+    private boolean isVerified = false;
 }

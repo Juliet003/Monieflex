@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +18,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 @RequiredArgsConstructor
 @Component
+@Slf4j
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsServiceImpl   userDetailsService;
@@ -28,19 +30,41 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
+
         final String requestTokenHeader = request.getHeader("Authorization");
         String jwtToken = requestTokenHeader != null &&
                 requestTokenHeader.startsWith("Bearer ") ? requestTokenHeader.substring(7) : null;
-        String currentUserEmail = jwtService.parseTokenClaims(jwtToken).get("email");
-        UserDetails userDetails = userDetailsService.loadUserByUsername(currentUserEmail);
-
-        if (SecurityContextHolder.getContext().getAuthentication() == null) {
-            UsernamePasswordAuthenticationToken authenticatedUserToken = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities());
-            authenticatedUserToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authenticatedUserToken);
+        if (jwtToken == null || jwtToken.isEmpty()){
+            log.warn("JWT Token is null or empty, skipping authentication");
+            filterChain.doFilter(request,response);
+            return;
         }
-        filterChain.doFilter(request, response);
+        try {
+            String currentUserEmail = jwtService.parseTokenClaims(jwtToken).get("email");
+
+            if (currentUserEmail != null && SecurityContextHolder.getContext().getAuthentication() == null){
+                UserDetails userDetails = userDetailsService.loadUserByUsername(currentUserEmail);
+                if (jwtService.validateToken(jwtToken,userDetails)){
+                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
+                    usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                }
+
+            }
+        }catch (Exception ex){
+            log.error("Error parsing JWT Token: {}", ex.getMessage());
+        }
+        filterChain.doFilter(request,response);
+
+//        UserDetails userDetails = userDetailsService.loadUserByUsername(currentUserEmail);
+//
+//        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+//            UsernamePasswordAuthenticationToken authenticatedUserToken = new UsernamePasswordAuthenticationToken(
+//                    userDetails, null, userDetails.getAuthorities());
+//            authenticatedUserToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+//            SecurityContextHolder.getContext().setAuthentication(authenticatedUserToken);
+//        }
+//        filterChain.doFilter(request, response);
     }
 
     private boolean isRegistrationOrLoginRequest(String requestUri) {

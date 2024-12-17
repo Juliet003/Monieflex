@@ -6,7 +6,9 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -14,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 @Component
+@Slf4j
 public class JwtService {
     private static final String secretToken = "sdfghjklsdfghjksdfghjdfghjertyucvbertyxcvertyxcvtyvertyertyuertyuxcvxcertertdfgxcvsdfgdf";
 
@@ -56,5 +59,34 @@ public class JwtService {
                  IllegalArgumentException e) {
             throw new JwtParsingException("Error parsing JWT token: " + e.getMessage());
         }
+    }
+    public boolean validateToken(String token, UserDetails userDetails){
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            String tokenEmail = claims.get("email",String.class);
+            Date expiration = claims.getExpiration();
+
+            return (tokenEmail != null && tokenEmail.equals(userDetails.getUsername()) && !isTokenExpired(expiration));
+        }catch (ExpiredJwtException e){
+            log.error("JWT Token has Expired : {} ",e.getMessage());
+        }catch (UnsupportedJwtException e){
+            log.error("JWT Token is unsupported : {} ",e.getMessage());
+        }catch (MalformedJwtException e){
+            log.error("JWT Token is malformed : {} ",e.getMessage());
+        }catch (SignatureException e){
+            log.error("Invalid JWT Signature: {}",e.getMessage());
+        }catch(IllegalArgumentException e){
+            log.error("JWT Token claims String is empty: {}",e.getMessage());
+        }
+        return false;
+    }
+
+    private boolean isTokenExpired(Date expiration) {
+        return expiration.before(new Date());
     }
 }
