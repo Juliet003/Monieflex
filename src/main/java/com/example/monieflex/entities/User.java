@@ -39,4 +39,9 @@ public class User {
     private LocalDateTime createdAt;
     private LocalDateTime expiryDate;
 
+    private String otp;
+    private LocalDateTime otpExpiryTime;
+
+    @Column(name = "is_verified",nullable = false)
+    private boolean isVerified = false;
 }

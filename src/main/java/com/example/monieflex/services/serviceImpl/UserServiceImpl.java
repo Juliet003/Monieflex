@@ -1,6 +1,7 @@
 package com.example.monieflex.services.serviceImpl;
 
 import com.example.monieflex.dto.request.LoginRequest;
+import com.example.monieflex.dto.request.OtpVerificationRequest;
 import com.example.monieflex.dto.request.UserSignupRequest;
 import com.example.monieflex.dto.request.VirtualAccountRequest;
 import com.example.monieflex.dto.response.ApiResponse;
@@ -30,6 +31,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -107,6 +109,33 @@ public class UserServiceImpl implements UserService {
         } catch (BadCredentialsException e) {
             throw new InvalidCredentialException("Invalid credentials: Enter email and password again");
         }
+    }
+
+    @Override
+    public void saveOtpForUser(String email, String otp) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()-> new RuntimeException("User not found"));
+
+        user.setOtp(otp);
+        user.setOtpExpiryTime(LocalDateTime.now().plusMinutes(5));
+
+        userRepository.save(user);
+
+    }
+
+    @Override
+    public String verifyOtp(OtpVerificationRequest otpVerificationRequest) {
+        String savedOtp = userRepository.findOtpByEmail(otpVerificationRequest.getEmail());
+        if(savedOtp == null){
+            return "OTP not found. Please request a new OTP";
+        }
+        if (savedOtp.equals(otpVerificationRequest.getOtp())){
+            userRepository.markUserAsVerified(otpVerificationRequest.getEmail());
+            return "OTP verification successful";
+        }else {
+            return "Invalid OTP. Please try again";
+        }
+
     }
 
     private Roles extractClientRole(UserDetails userDetails) {
