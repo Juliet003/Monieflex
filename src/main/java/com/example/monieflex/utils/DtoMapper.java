@@ -25,7 +25,6 @@ public class DtoMapper {
                 .bvn(userSignupRequest.getBvn())
                 .phoneNumber(userSignupRequest.getPhoneNumber())
                 .roles(Roles.USER)
-                .walletBalance(BigDecimal.ZERO)
                 .password(passwordEncoder.encode(userSignupRequest.getPassword()))
                 .confirmPassword(passwordEncoder.encode(userSignupRequest.getConfirmPassword()))
                 .build();
@@ -37,8 +36,6 @@ public class DtoMapper {
                 .lastName(savedUser.getLastName())
                 .email(savedUser.getEmail())
                 .phoneNumber(savedUser.getPhoneNumber())
-                .bvn(savedUser.getBvn())
-                .wallet(savedUser.getWalletBalance())
                 .build();
     }
 

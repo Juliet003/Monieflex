@@ -4,6 +4,7 @@ package com.example.monieflex.entities;
 import com.example.monieflex.enums.Roles;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
@@ -30,8 +31,13 @@ public class User {
     private Roles roles;
     @UpdateTimestamp
     private LocalDateTime lastLogin;
-
-    private BigDecimal walletBalance;
+    private int amount;
+    private String accountNumber;
+    private String frequency;
+    private String bankName;
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+    private LocalDateTime expiryDate;
 
     private String otp;
     private LocalDateTime otpExpiryTime;
